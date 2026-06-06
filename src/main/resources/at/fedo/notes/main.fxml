@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="at.fedo.notes.controller.MainController">
+
+    <top>
+        <ToolBar>
+            <Button text="New" onAction="#newNote"/>
+            <Button text="Save" onAction="#saveNote"/>
+            <Button text="Delete" onAction="#deleteNote"/>
+        </ToolBar>
+    </top>
+
+    <left>
+        <ListView fx:id="noteList" prefWidth="200"/>
+    </left>
+
+    <center>
+        <TextArea fx:id="editor" wrapText="true"/>
+    </center>
+
+</BorderPane>
