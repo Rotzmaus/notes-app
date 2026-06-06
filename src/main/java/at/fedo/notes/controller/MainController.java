@@ -1,70 +1,151 @@
 package at.fedo.notes.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-
+import javafx.scene.control.*;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.UncheckedIOException;
+import java.nio.file.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainController {
 
-    @FXML private ListView<String> noteList;
+    @FXML private TreeView<Path> noteTree;
     @FXML private TextArea editor;
-    @FXML private TextField titleField;
 
     private static final Path NOTES_DIR = Paths.get(System.getProperty("user.home"), "Documents", "Notes");
 
     @FXML
     public void initialize() throws IOException {
         Files.createDirectories(NOTES_DIR);
-        loadNoteList();
 
-        noteList.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal != null) openNote(newVal);
+        noteTree.setCellFactory(tv -> new TreeCell<>() {
+            @Override
+            protected void updateItem(Path item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    String name = item.getFileName().toString();
+                    setText(name.endsWith(".txt") ? name.replace(".txt", "") : name);
+                }
+            }
+        });
+
+        loadTree();
+
+        noteTree.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal != null && Files.isRegularFile(newVal.getValue())) {
+                openNote(newVal.getValue());
+            } else {
+                editor.clear();
+            }
         });
     }
 
-    private void loadNoteList() throws IOException {
-        noteList.getItems().clear();
-        Files.list(NOTES_DIR)
-             .filter(p -> p.toString().endsWith(".txt"))
-             .map(p -> p.getFileName().toString().replace(".txt", ""))
-             .forEach(noteList.getItems()::add);
+    private void loadTree() throws IOException {
+        TreeItem<Path> root = new TreeItem<>(NOTES_DIR);
+        root.setExpanded(true);
+        buildTree(root, NOTES_DIR);
+        noteTree.setRoot(root);
+        noteTree.setShowRoot(false);
+    }
+
+    private void buildTree(TreeItem<Path> parent, Path dir) throws IOException {
+        List<Path> children;
+        try (var stream = Files.list(dir)) {
+            children = stream.sorted().collect(Collectors.toList());
+        }
+        for (Path path : children) {
+            TreeItem<Path> item = new TreeItem<>(path);
+            if (Files.isDirectory(path)) {
+                item.setExpanded(true);
+                buildTree(item, path);
+                parent.getChildren().add(item);
+            } else if (path.toString().endsWith(".txt")) {
+                parent.getChildren().add(item);
+            }
+        }
+    }
+
+    private Path getTargetFolder() {
+        TreeItem<Path> selected = noteTree.getSelectionModel().getSelectedItem();
+        if (selected == null) return NOTES_DIR;
+        Path p = selected.getValue();
+        return Files.isDirectory(p) ? p : p.getParent();
     }
 
     @FXML
     private void newNote() throws IOException {
-        String name = "Note " + (noteList.getItems().size() + 1);
-        Files.writeString(NOTES_DIR.resolve(name + ".txt"), "");
-        loadNoteList();
-        noteList.getSelectionModel().select(name);
+        Path folder = getTargetFolder();
+        int i = 1;
+        Path file;
+        do {
+            file = folder.resolve("Note " + i++ + ".txt");
+        } while (Files.exists(file));
+        Files.writeString(file, "");
+        loadTree();
+        selectPath(file);
+    }
+
+    @FXML
+    private void newFolder() throws IOException {
+        Path folder = getTargetFolder();
+        Path dir = folder.resolve("New Folder");
+        int i = 1;
+        while (Files.exists(dir)) dir = folder.resolve("New Folder " + i++);
+        Files.createDirectory(dir);
+        loadTree();
     }
 
     @FXML
     private void saveNote() throws IOException {
-        String selected = noteList.getSelectionModel().getSelectedItem();
-        if (selected == null) return;
-        Files.writeString(NOTES_DIR.resolve(selected + ".txt"), editor.getText());
+        TreeItem<Path> selected = noteTree.getSelectionModel().getSelectedItem();
+        if (selected == null || !Files.isRegularFile(selected.getValue())) return;
+        Files.writeString(selected.getValue(), editor.getText());
     }
 
     @FXML
     private void deleteNote() throws IOException {
-        String selected = noteList.getSelectionModel().getSelectedItem();
+        TreeItem<Path> selected = noteTree.getSelectionModel().getSelectedItem();
         if (selected == null) return;
-        Files.deleteIfExists(NOTES_DIR.resolve(selected + ".txt"));
+        Path p = selected.getValue();
+        if (Files.isDirectory(p)) {
+            try (var stream = Files.walk(p)) {
+                stream.sorted(Comparator.reverseOrder())
+                      .forEach(f -> {
+                          try { Files.delete(f); } catch (IOException e) { throw new UncheckedIOException(e); }
+                      });
+            }
+        } else {
+            Files.deleteIfExists(p);
+        }
         editor.clear();
-        loadNoteList();
+        loadTree();
     }
 
-    private void openNote(String name) {
+    private void openNote(Path file) {
         try {
-            editor.setText(Files.readString(NOTES_DIR.resolve(name + ".txt")));
+            editor.setText(Files.readString(file));
         } catch (IOException e) {
             editor.setText("");
         }
+    }
+
+    private void selectPath(Path target) {
+        selectInTree(noteTree.getRoot(), target);
+    }
+
+    private boolean selectInTree(TreeItem<Path> item, Path target) {
+        if (item == null) return false;
+        if (item.getValue().equals(target)) {
+            noteTree.getSelectionModel().select(item);
+            return true;
+        }
+        for (TreeItem<Path> child : item.getChildren()) {
+            if (selectInTree(child, target)) return true;
+        }
+        return false;
     }
 }

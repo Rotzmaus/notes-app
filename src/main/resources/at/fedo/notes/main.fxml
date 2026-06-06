@@ -7,14 +7,15 @@
 
     <top>
         <ToolBar>
-            <Button text="New" onAction="#newNote"/>
+            <Button text="New Note" onAction="#newNote"/>
+            <Button text="New Folder" onAction="#newFolder"/>
             <Button text="Save" onAction="#saveNote"/>
             <Button text="Delete" onAction="#deleteNote"/>
         </ToolBar>
     </top>
 
     <left>
-        <ListView fx:id="noteList" prefWidth="200"/>
+        <TreeView fx:id="noteTree" prefWidth="200"/>
     </left>
 
     <center>
