@@ -26,13 +26,20 @@ src/main/resources/at/fedo/notes/
 
 - Notes are saved as `.txt` files under `~/Documents/Notes/`
 - Folders in the app = real subdirectories on disk
-- **Layout**: `BorderPane` — left `VBox` holds the file toolbar + `TreeView`; center `VBox` holds the formatting toolbar + `TextArea`
+- **Layout**: `BorderPane` — left `VBox` holds the file toolbar + `TreeView`; center `VBox` holds the formatting toolbar (empty placeholder) + `TextArea`
 - The left panel is a `TreeView<Path>` — folders are directories, notes are `.txt` leaf nodes
 - Selecting a note loads it into the editor; selecting a folder clears the editor
-- "New Note" creates a note inside the currently selected folder (or root if none selected)
-- "New Folder" creates a subfolder inside the currently selected folder
-- "Delete" removes a note file, or a folder and all its contents recursively
-- `.txt` extension is stripped from display names via a custom `TreeCell`
+- `.txt` extension is stripped from display names via a custom `TreeCell` (`RenamableTreeCell`)
+
+## Toolbar & interactions
+
+- **Left toolbar**: "New Note" and "New Folder" only — creates inside selected folder/root
+- **Right-click on a note or folder**: context menu with Rename and Delete
+- **Right-click on empty tree space**: context menu with New Note and New Folder
+- **Double-click a tree item**: inline rename via `TextField` in the cell (Enter confirms, Escape cancels)
+- **Drag a note or folder** onto a folder → moves inside it; onto a note/empty space → moves to that level; circular moves are blocked
+- **Ctrl+S**: saves the current note (scene-level event filter, works regardless of focus)
+- **Autosave**: `Timeline` fires every 10 seconds and saves the open note silently
 
 ## Appearance
 
@@ -50,4 +57,7 @@ Any future UI work must stay consistent with these choices: dark backgrounds, or
 - `getTargetFolder()` resolves where to create: selected dir → use it; selected note → use its parent; nothing selected → `NOTES_DIR`
 - Tree is rebuilt from disk on every mutating action (`loadTree()`)
 - `selectPath()` walks the tree after creation to restore selection
+- `performRename()` moves the file on disk (re-appends `.txt` for notes); `performMove()` moves notes/folders between directories
+- `computeTargetFolder()` resolves the drop destination and blocks circular moves
+- Context menus use `setContextMenu()` on both the tree and each cell — JavaFX owns the show/hide lifecycle so auto-hide works correctly; empty cells expose the tree's menu, cells with content show the item menu
 - No database — filesystem is the source of truth
