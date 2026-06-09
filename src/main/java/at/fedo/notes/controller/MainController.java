@@ -55,15 +55,12 @@ public class MainController {
         autosave.play();
 
         // Right-click on empty tree space → New Note / New Folder
+        // Use setContextMenu() so JavaFX owns the show/hide lifecycle and auto-hide works correctly.
         MenuItem miNewNote   = new MenuItem("New Note");
         MenuItem miNewFolder = new MenuItem("New Folder");
         miNewNote.setOnAction(e   -> { try { newNote();   } catch (IOException ex) {} });
         miNewFolder.setOnAction(e -> { try { newFolder(); } catch (IOException ex) {} });
-        ContextMenu emptyMenu = new ContextMenu(miNewNote, miNewFolder);
-        noteTree.setOnContextMenuRequested(e -> {
-            emptyMenu.show(noteTree, e.getScreenX(), e.getScreenY());
-            e.consume();
-        });
+        noteTree.setContextMenu(new ContextMenu(miNewNote, miNewFolder));
 
         // Drag over/drop on the tree background → move to root
         noteTree.setOnDragOver(e -> {
@@ -209,6 +206,7 @@ public class MainController {
         private static final PseudoClass DRAG_OVER_PC = PseudoClass.getPseudoClass("drag-over");
 
         private TextField textField;
+        private final ContextMenu cellMenu;
 
         RenamableTreeCell() {
             // ── Double-click → rename ──────────────────────────────────────
@@ -217,19 +215,13 @@ public class MainController {
             });
 
             // ── Right-click on item → Rename / Delete ─────────────────────
+            // cellMenu is assigned in updateItem so empty cells fall through to the tree's menu.
             MenuItem miRename = new MenuItem("Rename");
             MenuItem miDelete = new MenuItem("Delete");
             miRename.setOnAction(e -> getTreeView().edit(getTreeItem()));
             miDelete.setOnAction(e -> { try { deleteNote(); } catch (IOException ex) {} });
-            ContextMenu cellMenu = new ContextMenu(miRename, miDelete);
-
-            setOnContextMenuRequested(e -> {
-                if (!isEmpty()) {
-                    noteTree.getSelectionModel().select(getTreeItem());
-                    cellMenu.show(this, e.getScreenX(), e.getScreenY());
-                    e.consume(); // stop emptyMenu on the tree from firing
-                }
-            });
+            cellMenu = new ContextMenu(miRename, miDelete);
+            cellMenu.setOnShowing(e -> noteTree.getSelectionModel().select(getTreeItem()));
 
             // ── Drag source ───────────────────────────────────────────────
             setOnDragDetected(e -> {
@@ -279,6 +271,8 @@ public class MainController {
         @Override
         protected void updateItem(Path item, boolean empty) {
             super.updateItem(item, empty);
+            // Non-null cells show the item menu; empty cells expose the tree's menu (New Note/Folder).
+            setContextMenu(empty || item == null ? null : cellMenu);
             if (empty || item == null) {
                 setText(null);
                 setGraphic(null);
