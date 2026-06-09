@@ -1,8 +1,13 @@
 package at.fedo.notes.controller;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.util.Duration;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.*;
@@ -33,6 +38,21 @@ public class MainController {
                 editor.clear();
             }
         });
+
+        noteTree.sceneProperty().addListener((obs, old, scene) -> {
+            if (scene != null) {
+                scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+                    if (e.isControlDown() && e.getCode() == KeyCode.S) {
+                        saveNote();
+                        e.consume();
+                    }
+                });
+            }
+        });
+
+        Timeline autosave = new Timeline(new KeyFrame(Duration.seconds(10), e -> saveNote()));
+        autosave.setCycleCount(Animation.INDEFINITE);
+        autosave.play();
     }
 
     private void loadTree() throws IOException {
@@ -91,10 +111,12 @@ public class MainController {
     }
 
     @FXML
-    private void saveNote() throws IOException {
+    private void saveNote() {
         TreeItem<Path> selected = noteTree.getSelectionModel().getSelectedItem();
         if (selected == null || !Files.isRegularFile(selected.getValue())) return;
-        Files.writeString(selected.getValue(), editor.getText());
+        try {
+            Files.writeString(selected.getValue(), editor.getText());
+        } catch (IOException ignored) {}
     }
 
     @FXML
