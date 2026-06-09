@@ -23,13 +23,32 @@
     -fx-border-radius: 0;
 }
 
-/* ===== Toolbar ===== */
+/* ===== Left panel (file toolbar + tree) ===== */
+.notes-panel {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: #333333;
+    -fx-border-width: 0 1 0 0;
+}
+
+/* ===== Toolbars (shared base) ===== */
 .tool-bar {
     -fx-background-color: #252525;
     -fx-border-color: #3a3a3a;
     -fx-border-width: 0 0 1 0;
-    -fx-padding: 6 8;
-    -fx-spacing: 5;
+    -fx-padding: 5 6;
+    -fx-spacing: 4;
+}
+
+/* File/folder toolbar — compact so buttons fit in the 220 px panel */
+.file-toolbar .button {
+    -fx-padding: 3 8;
+    -fx-font-size: 12px;
+}
+
+/* Text formatting toolbar — empty for now, keeps its height as a placeholder */
+.formatting-toolbar {
+    -fx-min-height: 34px;
+    -fx-background-color: #222222;
 }
 
 /* ===== Buttons ===== */
@@ -63,12 +82,11 @@
 /* ===== TreeView ===== */
 .tree-view {
     -fx-background-color: #1e1e1e;
-    -fx-border-color: #333333;
-    -fx-border-width: 0 1 0 0;
+    -fx-border-color: transparent;
 }
 
 .tree-view:focused {
-    -fx-border-color: #333333;
+    -fx-border-color: transparent;
 }
 
 .tree-cell {

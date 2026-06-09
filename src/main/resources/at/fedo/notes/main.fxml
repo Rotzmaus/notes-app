@@ -5,21 +5,25 @@
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="at.fedo.notes.controller.MainController">
 
-    <top>
-        <ToolBar>
-            <Button text="New Note" onAction="#newNote"/>
-            <Button text="New Folder" onAction="#newFolder"/>
-            <Button text="Save" onAction="#saveNote"/>
-            <Button text="Delete" onAction="#deleteNote"/>
-        </ToolBar>
-    </top>
-
     <left>
-        <TreeView fx:id="noteTree" prefWidth="200"/>
+        <VBox prefWidth="220" styleClass="notes-panel">
+            <ToolBar styleClass="file-toolbar">
+                <Button text="New Note"   onAction="#newNote"/>
+                <Button text="New Folder" onAction="#newFolder"/>
+                <Button text="Save"       onAction="#saveNote"/>
+                <Button text="Delete"     onAction="#deleteNote"/>
+            </ToolBar>
+            <TreeView fx:id="noteTree" VBox.vgrow="ALWAYS"/>
+        </VBox>
     </left>
 
     <center>
-        <TextArea fx:id="editor" wrapText="true"/>
+        <VBox>
+            <ToolBar styleClass="formatting-toolbar">
+                <!-- Text formatting options (font size, headings, lists…) go here -->
+            </ToolBar>
+            <TextArea fx:id="editor" wrapText="true" VBox.vgrow="ALWAYS"/>
+        </VBox>
     </center>
 
 </BorderPane>

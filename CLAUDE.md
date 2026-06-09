@@ -18,13 +18,15 @@ src/main/java/at/fedo/notes/
   controller/MainController.java  # All UI logic
 
 src/main/resources/at/fedo/notes/
-  main.fxml                       # BorderPane: ToolBar (top), TreeView (left), TextArea (center)
+  main.fxml                       # BorderPane: VBox left (file-toolbar + TreeView), VBox center (formatting-toolbar + TextArea)
+  styles.css                      # Dark theme — see Appearance section
 ```
 
 ## How it works
 
 - Notes are saved as `.txt` files under `~/Documents/Notes/`
 - Folders in the app = real subdirectories on disk
+- **Layout**: `BorderPane` — left `VBox` holds the file toolbar + `TreeView`; center `VBox` holds the formatting toolbar + `TextArea`
 - The left panel is a `TreeView<Path>` — folders are directories, notes are `.txt` leaf nodes
 - Selecting a note loads it into the editor; selecting a folder clears the editor
 - "New Note" creates a note inside the currently selected folder (or root if none selected)
