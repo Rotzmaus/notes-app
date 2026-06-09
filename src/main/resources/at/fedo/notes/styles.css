@@ -45,10 +45,77 @@
     -fx-font-size: 12px;
 }
 
-/* Text formatting toolbar — empty for now, keeps its height as a placeholder */
+/* Text formatting toolbar */
 .formatting-toolbar {
-    -fx-min-height: 34px;
     -fx-background-color: #222222;
+}
+
+.formatting-toolbar .button {
+    -fx-padding: 3 10;
+    -fx-font-size: 12px;
+}
+
+/* ComboBox (heading selector) */
+.combo-box {
+    -fx-background-color: #333333;
+    -fx-border-color: #484848;
+    -fx-border-width: 1;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-font-size: 12px;
+}
+
+.combo-box:hover {
+    -fx-border-color: #e07820;
+}
+
+.combo-box:focused, .combo-box:showing {
+    -fx-border-color: #e07820;
+}
+
+.combo-box .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cccccc;
+    -fx-padding: 3 6;
+    -fx-background-radius: 0;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-padding: 0 6;
+}
+
+.combo-box .arrow {
+    -fx-background-color: #999999;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #252525;
+    -fx-border-color: #3a3a3a;
+    -fx-border-width: 1;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-effect: null;
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cccccc;
+    -fx-padding: 5 10;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.combo-box-popup .list-cell:filled:hover {
+    -fx-background-color: #e07820;
+    -fx-text-fill: #111111;
+}
+
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #b85e10;
+    -fx-text-fill: #111111;
 }
 
 /* ===== Buttons ===== */
@@ -116,23 +183,9 @@
     -fx-background-color: #111111;
 }
 
-/* ===== TextArea (editor) ===== */
-.text-area {
+/* ===== WebView (editor) ===== */
+.web-view {
     -fx-background-color: #1e1e1e;
-    -fx-border-color: transparent;
-    -fx-border-width: 0 0 0 2;
-    -fx-font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
-    -fx-font-size: 13px;
-}
-
-.text-area .content {
-    -fx-background-color: #1e1e1e;
-    -fx-text-fill: #e0e0e0;
-    -fx-background-radius: 0;
-}
-
-.text-area:focused {
-    -fx-border-color: #e07820;
 }
 
 /* ===== TextField (inline rename in tree) ===== */

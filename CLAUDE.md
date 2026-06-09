@@ -15,10 +15,10 @@ Or use the desktop shortcut at `~/Desktop/Notes.desktop`.
 ```
 src/main/java/at/fedo/notes/
   App.java                        # Entry point, loads main.fxml into a 900x600 stage
-  controller/MainController.java  # All UI logic
+  controller/MainController.java  # All UI logic + embedded HTML/CSS/JS editor
 
 src/main/resources/at/fedo/notes/
-  main.fxml                       # BorderPane: VBox left (file-toolbar + TreeView), VBox center (formatting-toolbar + TextArea)
+  main.fxml                       # BorderPane: VBox left (file-toolbar + TreeView), VBox center (formatting-toolbar + WebView)
   styles.css                      # Dark theme — see Appearance section
 ```
 
@@ -26,20 +26,57 @@ src/main/resources/at/fedo/notes/
 
 - Notes are saved as `.txt` files under `~/Documents/Notes/`
 - Folders in the app = real subdirectories on disk
-- **Layout**: `BorderPane` — left `VBox` holds the file toolbar + `TreeView`; center `VBox` holds the formatting toolbar (empty placeholder) + `TextArea`
+- **Layout**: `BorderPane` — left `VBox` holds the file toolbar + `TreeView`; center `VBox` holds the formatting toolbar + `WebView` editor
 - The left panel is a `TreeView<Path>` — folders are directories, notes are `.txt` leaf nodes
-- Selecting a note loads it into the editor; selecting a folder clears the editor
+- Selecting a note saves the current note then loads the new one; selecting a folder keeps the current note visible
 - `.txt` extension is stripped from display names via a custom `TreeCell` (`RenamableTreeCell`)
+- The window title shows the open note's name; resets to "Notes" when no note is open
+
+## Editor (WebView)
+
+The editor is a `WebView` containing a contenteditable HTML page embedded as a Java text block in `MainController.editorHtml()`. Each line of the note is a `<div class="line TYPE">` where TYPE drives the CSS font size.
+
+**Plain-text storage format** — prefixes stored verbatim in `.txt` files:
+- `# ` → H1, `## ` → H2, `### ` → H3 (no prefix = Body Text)
+- `• ` → bullet list (U+2022)
+- `☐ ` → unchecked to-do (U+2610), `☑ ` → checked to-do (U+2611)
+
+**Font sizes**: Body / Bullet / To-Do = 26 px · H3 = 32 px · H2 = 38 px · H1 = 46 px (bold)
+
+**Content flow** — Java → JS:
+- Load: `Files.readString` → escape for JS string literal → `executeScript("setContent('...')")`
+- Save: `executeScript("getContent()")` → `Files.writeString`
+- `currentFile` field tracks what is loaded in the editor; `saveNote()` always writes to `currentFile`, never to the tree selection (avoids overwrite-on-switch bug)
+
+**JS functions exposed** (called from Java via `executeScript`):
+- `setContent(text)` — splits by `\n`, creates one div per line with correct CSS class
+- `getContent()` — joins div textContent with `\n`; strips trailing blank lines
+- `getCurrentHeadingLevel()` → `"Body Text" | "H1" | "H2" | "H3"`
+- `applyHeadingLevel(0‑3)` — replaces heading prefix on selected lines
+- `applyListType('bullet' | 'todo')` — toggles list prefix on selected lines (toggle-off if all lines already have it); restores cursor after DOM change
+
+**Keyboard handling in JS** (keyCode fallbacks for JavaFX WebKit compatibility):
+- `Enter` — splits line at cursor; new line auto-inherits list prefix; Enter on empty list item exits the list
+- `Backspace` at line start — merges with previous line
+- `Delete` at line end — merges with next line
+- Click within 1 char of line start on a `☐`/`☑` line — toggles checked state
+
+**Heading combo polling**: a 300 ms `Timeline` calls `getCurrentHeadingLevel()` and updates the combo without triggering `applyHeading()` (guarded by `updatingHeadingCombo` flag).
 
 ## Toolbar & interactions
 
-- **Left toolbar**: "New Note" and "New Folder" only — creates inside selected folder/root
+- **Left toolbar**: "New Note" and "New Folder" — creates inside selected folder/root
+- **Formatting toolbar** (center, above editor):
+  - **Save** button (leftmost) — saves current note immediately
+  - **Heading combo** — Body Text / H1 / H2 / H3; reflects current line; applies on change
+  - **• List** button — toggles bullet prefix on current/selected lines
+  - **☐ To-Do** button — toggles to-do prefix; click near line start to check/uncheck
 - **Right-click on a note or folder**: context menu with Rename and Delete
 - **Right-click on empty tree space**: context menu with New Note and New Folder
 - **Double-click a tree item**: inline rename via `TextField` in the cell (Enter confirms, Escape cancels)
 - **Drag a note or folder** onto a folder → moves inside it; onto a note/empty space → moves to that level; circular moves are blocked
-- **Ctrl+S**: saves the current note (scene-level event filter, works regardless of focus)
-- **Autosave**: `Timeline` fires every 10 seconds and saves the open note silently
+- **Ctrl+S**: saves the current note (scene-level event filter)
+- **Autosave**: `Timeline` fires every 10 seconds
 
 ## Appearance
 
@@ -48,7 +85,8 @@ src/main/resources/at/fedo/notes/
 - **Shape language**: rectangular and sharp — `border-radius: 0` everywhere, no rounded corners
 - **Stylesheet**: `src/main/resources/at/fedo/notes/styles.css`, loaded in `App.java` via `scene.getStylesheets()`
 - **Text colours**: UI labels `#cccccc`, editor text `#e0e0e0`, selected-item text `#111111` (dark for contrast on orange)
-- **Fonts**: UI — system sans-serif; editor — monospace (Consolas / Ubuntu Mono)
+- **Fonts**: UI — system sans-serif; editor — monospace (Consolas / Ubuntu Mono) at 26 px body size
+- **Editor colours** defined in the embedded HTML: headings are progressively lighter (`#e8e8e8` → `#ffffff`); selection highlight uses orange at 35% opacity
 
 Any future UI work must stay consistent with these choices: dark backgrounds, orange as the sole accent, zero border-radius on all controls.
 
@@ -60,4 +98,5 @@ Any future UI work must stay consistent with these choices: dark backgrounds, or
 - `performRename()` moves the file on disk (re-appends `.txt` for notes); `performMove()` moves notes/folders between directories
 - `computeTargetFolder()` resolves the drop destination and blocks circular moves
 - Context menus use `setContextMenu()` on both the tree and each cell — JavaFX owns the show/hide lifecycle so auto-hide works correctly; empty cells expose the tree's menu, cells with content show the item menu
+- `javafx-web` is a required Maven dependency (adds WebKit-based WebView)
 - No database — filesystem is the source of truth

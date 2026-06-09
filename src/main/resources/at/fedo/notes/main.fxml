@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.web.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml"
             fx:controller="at.fedo.notes.controller.MainController">
@@ -18,9 +19,14 @@
     <center>
         <VBox>
             <ToolBar styleClass="formatting-toolbar">
-                <!-- Text formatting options (font size, headings, lists…) go here -->
+                <Button text="Save" onAction="#saveNote"/>
+                <Separator/>
+                <ComboBox fx:id="headingCombo" onAction="#applyHeading" prefWidth="110"/>
+                <Separator/>
+                <Button text="&#8226; List" onAction="#toggleBulletList"/>
+                <Button text="&#9744; To-Do" onAction="#toggleTodoList"/>
             </ToolBar>
-            <TextArea fx:id="editor" wrapText="true" VBox.vgrow="ALWAYS"/>
+            <WebView fx:id="editorView" VBox.vgrow="ALWAYS"/>
         </VBox>
     </center>
 
