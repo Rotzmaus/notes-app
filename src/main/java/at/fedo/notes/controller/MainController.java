@@ -2,6 +2,7 @@ package at.fedo.notes.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.*;
@@ -20,18 +21,8 @@ public class MainController {
     public void initialize() throws IOException {
         Files.createDirectories(NOTES_DIR);
 
-        noteTree.setCellFactory(tv -> new TreeCell<>() {
-            @Override
-            protected void updateItem(Path item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    String name = item.getFileName().toString();
-                    setText(name.endsWith(".txt") ? name.replace(".txt", "") : name);
-                }
-            }
-        });
+        noteTree.setEditable(true);
+        noteTree.setCellFactory(tv -> new RenamableTreeCell());
 
         loadTree();
 
@@ -147,5 +138,87 @@ public class MainController {
             if (selectInTree(child, target)) return true;
         }
         return false;
+    }
+
+    private void performRename(Path oldPath, String newName) {
+        try {
+            String actualName = Files.isRegularFile(oldPath) ? newName + ".txt" : newName;
+            Path newPath = oldPath.getParent().resolve(actualName);
+            if (!newPath.equals(oldPath) && !Files.exists(newPath)) {
+                Files.move(oldPath, newPath);
+            }
+            loadTree();
+            selectPath(newPath);
+        } catch (IOException e) {
+            // ignore failed renames
+        }
+    }
+
+    private class RenamableTreeCell extends TreeCell<Path> {
+        private TextField textField;
+
+        RenamableTreeCell() {
+            setOnMouseClicked(e -> {
+                if (e.getClickCount() == 2 && !isEmpty()) {
+                    getTreeView().edit(getTreeItem());
+                }
+            });
+        }
+
+        @Override
+        protected void updateItem(Path item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setText(null);
+                setGraphic(null);
+            } else if (isEditing()) {
+                if (textField != null) textField.setText(displayName(item));
+                setText(null);
+                setGraphic(textField);
+            } else {
+                setText(displayName(item));
+                setGraphic(null);
+            }
+        }
+
+        @Override
+        public void startEdit() {
+            super.startEdit();
+            if (textField == null) {
+                textField = new TextField();
+                textField.setOnAction(e -> commitRename(textField.getText().trim()));
+                textField.setOnKeyPressed(e -> {
+                    if (e.getCode() == KeyCode.ESCAPE) cancelEdit();
+                });
+                textField.focusedProperty().addListener((obs, was, now) -> {
+                    if (!now && isEditing()) commitRename(textField.getText().trim());
+                });
+            }
+            textField.setText(displayName(getItem()));
+            setText(null);
+            setGraphic(textField);
+            textField.selectAll();
+            textField.requestFocus();
+        }
+
+        @Override
+        public void cancelEdit() {
+            super.cancelEdit();
+            setText(displayName(getItem()));
+            setGraphic(null);
+        }
+
+        private void commitRename(String newName) {
+            if (!isEditing()) return;
+            Path oldPath = getItem();
+            cancelEdit();
+            if (!newName.isEmpty()) performRename(oldPath, newName);
+        }
+
+        private String displayName(Path path) {
+            if (path == null) return "";
+            String name = path.getFileName().toString();
+            return name.endsWith(".txt") ? name.replace(".txt", "") : name;
+        }
     }
 }
