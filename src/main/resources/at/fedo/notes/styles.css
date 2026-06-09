@@ -104,6 +104,10 @@
     -fx-background-color: #2a2a2a;
 }
 
+.tree-cell:drag-over {
+    -fx-background-color: rgba(224, 120, 32, 0.35);
+}
+
 .tree-cell .arrow {
     -fx-background-color: #777777;
 }

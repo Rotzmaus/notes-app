@@ -10,8 +10,6 @@
             <ToolBar styleClass="file-toolbar">
                 <Button text="New Note"   onAction="#newNote"/>
                 <Button text="New Folder" onAction="#newFolder"/>
-                <Button text="Save"       onAction="#saveNote"/>
-                <Button text="Delete"     onAction="#deleteNote"/>
             </ToolBar>
             <TreeView fx:id="noteTree" VBox.vgrow="ALWAYS"/>
         </VBox>
