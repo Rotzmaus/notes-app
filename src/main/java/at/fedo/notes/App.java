@@ -11,6 +11,7 @@ public class App extends Application {
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("main.fxml"));
         Scene scene = new Scene(loader.load(), 900, 600);
+        scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
         stage.setTitle("Notes");
         stage.setScene(scene);
         stage.show();

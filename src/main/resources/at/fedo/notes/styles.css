@@ -1,0 +1,185 @@
+/* ===== Looked-up color overrides (cascade into Modena) ===== */
+.root {
+    -fx-base: #2d2d2d;
+    -fx-background: #1a1a1a;
+    -fx-control-inner-background: #1e1e1e;
+    -fx-control-inner-background-alt: #222222;
+    -fx-light-text-color: #e0e0e0;
+    -fx-mid-text-color: #aaaaaa;
+    -fx-dark-text-color: #111111;
+    -fx-text-fill: #e0e0e0;
+    -fx-accent: #e07820;
+    -fx-focus-color: #e07820;
+    -fx-faint-focus-color: rgba(224, 120, 32, 0.15);
+    -fx-font-family: "Segoe UI", "Ubuntu", "Arial", sans-serif;
+    -fx-font-size: 13px;
+}
+
+/* ===== Strip rounded corners globally ===== */
+.button, .text-field, .text-area, .tree-view, .tree-cell,
+.scroll-bar, .scroll-bar .thumb, .scroll-bar .track,
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+/* ===== Toolbar ===== */
+.tool-bar {
+    -fx-background-color: #252525;
+    -fx-border-color: #3a3a3a;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 6 8;
+    -fx-spacing: 5;
+}
+
+/* ===== Buttons ===== */
+.button {
+    -fx-background-color: #333333;
+    -fx-text-fill: #cccccc;
+    -fx-border-color: #484848;
+    -fx-border-width: 1;
+    -fx-padding: 5 14;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #e07820;
+    -fx-text-fill: #111111;
+    -fx-border-color: #e07820;
+}
+
+.button:pressed {
+    -fx-background-color: #b85e10;
+    -fx-text-fill: #111111;
+    -fx-border-color: #b85e10;
+}
+
+.button:focused {
+    -fx-background-color: #333333;
+    -fx-border-color: #e07820;
+    -fx-border-width: 1;
+}
+
+/* ===== TreeView ===== */
+.tree-view {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: #333333;
+    -fx-border-width: 0 1 0 0;
+}
+
+.tree-view:focused {
+    -fx-border-color: #333333;
+}
+
+.tree-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cccccc;
+    -fx-padding: 4 8;
+}
+
+.tree-cell:selected {
+    -fx-background-color: #e07820;
+    -fx-text-fill: #111111;
+}
+
+.tree-cell:hover:!selected {
+    -fx-background-color: #2a2a2a;
+}
+
+.tree-cell .arrow {
+    -fx-background-color: #777777;
+}
+
+.tree-cell:selected .arrow {
+    -fx-background-color: #111111;
+}
+
+/* ===== TextArea (editor) ===== */
+.text-area {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 2;
+    -fx-font-family: "Consolas", "Ubuntu Mono", "Courier New", monospace;
+    -fx-font-size: 13px;
+}
+
+.text-area .content {
+    -fx-background-color: #1e1e1e;
+    -fx-text-fill: #e0e0e0;
+    -fx-background-radius: 0;
+}
+
+.text-area:focused {
+    -fx-border-color: #e07820;
+}
+
+/* ===== TextField (inline rename in tree) ===== */
+.text-field {
+    -fx-background-color: #111111;
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #e07820;
+    -fx-border-width: 1;
+    -fx-padding: 2 4;
+}
+
+.text-field:focused {
+    -fx-border-color: #e07820;
+    -fx-border-width: 2;
+}
+
+/* ===== Scrollbars ===== */
+.scroll-bar {
+    -fx-background-color: #1a1a1a;
+}
+
+.scroll-bar .track {
+    -fx-background-color: #1a1a1a;
+    -fx-border-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #3a3a3a;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #e07820;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: #252525;
+    -fx-padding: 4;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: #555555;
+}
+
+/* ===== ScrollPane (wraps TextArea internals) ===== */
+.scroll-pane {
+    -fx-background-color: #1e1e1e;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: #1e1e1e;
+}
+
+/* ===== Context menus / popups (if any) ===== */
+.context-menu {
+    -fx-background-color: #252525;
+    -fx-border-color: #3a3a3a;
+    -fx-border-width: 1;
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+}
+
+.menu-item {
+    -fx-background-color: transparent;
+    -fx-text-fill: #cccccc;
+}
+
+.menu-item:focused {
+    -fx-background-color: #e07820;
+    -fx-text-fill: #111111;
+}

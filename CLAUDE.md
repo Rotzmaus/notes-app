@@ -32,6 +32,17 @@ src/main/resources/at/fedo/notes/
 - "Delete" removes a note file, or a folder and all its contents recursively
 - `.txt` extension is stripped from display names via a custom `TreeCell`
 
+## Appearance
+
+- **Theme**: dark — `#1a1a1a` window background, `#1e1e1e` panels, `#252525` toolbar
+- **Accent colour**: orange `#e07820` — used for button hover/press, selected tree items, focus borders, scrollbar thumb hover
+- **Shape language**: rectangular and sharp — `border-radius: 0` everywhere, no rounded corners
+- **Stylesheet**: `src/main/resources/at/fedo/notes/styles.css`, loaded in `App.java` via `scene.getStylesheets()`
+- **Text colours**: UI labels `#cccccc`, editor text `#e0e0e0`, selected-item text `#111111` (dark for contrast on orange)
+- **Fonts**: UI — system sans-serif; editor — monospace (Consolas / Ubuntu Mono)
+
+Any future UI work must stay consistent with these choices: dark backgrounds, orange as the sole accent, zero border-radius on all controls.
+
 ## Key details
 
 - `getTargetFolder()` resolves where to create: selected dir → use it; selected note → use its parent; nothing selected → `NOTES_DIR`
